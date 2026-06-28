@@ -24,6 +24,12 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Task Tracker API is running" });
 });
 
+app.get("/api/debug", (req, res) => {
+  res.json({
+    message: "Latest backend code is running",
+    time: new Date().toISOString(),
+  });
+});
 app.use("/api/tasks", taskRoutes);
 
 app.use(notFound);
