@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const apiClient = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -16,14 +16,15 @@ apiClient.interceptors.request.use((config) => {
 
   return config;
 });
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-      window.location.href = "/signin";
+      window.location.href = "/signin"; // agar route /login hai toh yaha /login karna
     }
 
     return Promise.reject(error);
-  },
+  }
 );
