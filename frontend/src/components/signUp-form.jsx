@@ -13,7 +13,7 @@ import {
 import { Input } from "./ui/input";
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { signupUser } from "@/api/authApi";
 
 export function SignupForm({ className, ...props }) {
@@ -193,7 +193,12 @@ export function SignupForm({ className, ...props }) {
                 <div className="text-sm text-balance text-muted-foreground flex flex-col items-center text-center mb-1">
                   <LabelDemo />
                 </div>
-                Already have an account? <a href="/signin">Sign in</a>
+                <p className="text-sm text-muted-foreground">
+                  Already have an account?{" "}
+                  <Link to="/signin" className="underline underline-offset-4">
+                    Sign in
+                  </Link>
+                </p>
               </FieldDescription>
             </FieldGroup>
           </form>
