@@ -13,11 +13,27 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 connectDB();
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-  }),
-);
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://task-manager-rho-one-47.vercel.app",
+];
+
+const corsOptions = {
+  origin(origin, callback) {
+    // Allows requests without an Origin header, such as Postman.
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked origin: ${origin}`));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 app.get("/api/health", (req, res) => {
