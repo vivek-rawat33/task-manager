@@ -16,9 +16,9 @@ connectDB();
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://task-manager-mu-jet-14.vercel.app",
   "https://task-manager-rho-one-47.vercel.app",
   "https://task-manager-git-main-vivek-rawat33s-projects.vercel.app",
-  "https://task-manager-mu-jet-14.vercel.app/",
 ];
 
 const corsOptions = {
