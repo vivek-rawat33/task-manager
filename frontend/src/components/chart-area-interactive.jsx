@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -16,6 +16,8 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from "@/components/ui/chart";
 import {
   Select,
@@ -40,12 +42,12 @@ const RANGE_LABELS = {
 
 const chartConfig = {
   created: {
-    label: "Tasks created",
-    color: "var(--chart-1)",
+    label: "Created",
+    color: "hsl(221 83% 53%)", // blue
   },
   completed: {
-    label: "Tasks completed",
-    color: "var(--chart-2)",
+    label: "Completed",
+    color: "hsl(142 71% 45%)", // green
   },
 };
 
@@ -114,9 +116,13 @@ export function ChartAreaInteractive({ tasks = [] }) {
        * completedAt is the accurate value.
        * updatedAt is used only as a temporary fallback for existing tasks.
        */
+      const isCompleted =
+        task.rawStatus === "completed" ||
+        task.status === "completed" ||
+        task.status === "Done";
+
       const completedDate =
-        task.completedAt ||
-        (task.status === "completed" ? task.updatedAt : null);
+        task.completedAt || (isCompleted ? task.updatedAt : null);
 
       const completedDateKey = getLocalDateKey(completedDate);
 
@@ -198,9 +204,17 @@ export function ChartAreaInteractive({ tasks = [] }) {
         ) : (
           <ChartContainer
             config={chartConfig}
-            className="aspect-auto h-62.5 w-full"
+            className="aspect-auto  h-62.5  w-full"
           >
-            <AreaChart data={chartData}>
+            <AreaChart
+              data={chartData}
+              margin={{
+                top: 16,
+                right: 16,
+                left: 0,
+                bottom: 8,
+              }}
+            >
               <defs>
                 <linearGradient id="fillCreated" x1="0" y1="0" x2="0" y2="1">
                   <stop
@@ -229,7 +243,11 @@ export function ChartAreaInteractive({ tasks = [] }) {
                 </linearGradient>
               </defs>
 
-              <CartesianGrid vertical={false} />
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="3 3"
+                className="stroke-muted"
+              />
 
               <XAxis
                 dataKey="date"
@@ -238,6 +256,14 @@ export function ChartAreaInteractive({ tasks = [] }) {
                 tickMargin={8}
                 minTickGap={32}
                 tickFormatter={formatDateLabel}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                width={28}
+                allowDecimals={false}
+                className="text-xs"
               />
 
               <ChartTooltip
@@ -250,12 +276,16 @@ export function ChartAreaInteractive({ tasks = [] }) {
                 }
               />
 
+              <ChartLegend content={<ChartLegendContent />} className="pt-3" />
+
               <Area
                 dataKey="created"
                 type="monotone"
                 fill="url(#fillCreated)"
                 stroke="var(--color-created)"
                 strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 5 }}
               />
 
               <Area
@@ -264,6 +294,8 @@ export function ChartAreaInteractive({ tasks = [] }) {
                 fill="url(#fillCompleted)"
                 stroke="var(--color-completed)"
                 strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 5 }}
               />
             </AreaChart>
           </ChartContainer>

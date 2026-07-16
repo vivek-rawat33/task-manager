@@ -132,6 +132,28 @@ function getTodayDateInputValue() {
   today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
   return today.toISOString().split("T")[0];
 }
+function formatDeadline(value) {
+  if (!value) return "No deadline";
+
+  return new Date(`${value}T00:00:00`).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getPriorityStyles(priority) {
+  if (priority === "High") {
+    return "text-rose-600 dark:text-rose-400";
+  }
+
+  if (priority === "Medium") {
+    return "text-amber-600 dark:text-amber-400";
+  }
+
+  return "text-emerald-600 dark:text-emerald-400";
+}
+
 const columns = [
   {
     id: "drag",
@@ -239,31 +261,15 @@ const columns = [
   {
     accessorKey: "target",
     header: "Deadline",
-    cell: ({ row, table }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
+    cell: ({ row }) => {
+      const deadline = row.original.target;
 
-          const formData = new FormData(e.currentTarget);
-          const target = formData.get("target");
-
-          table.options.meta?.updateTask(row.original.id, {
-            target: target || "",
-          });
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-target`} className="sr-only">
-          Deadline
-        </Label>
-
-        <Input
-          name="target"
-          className="ml-auto h-8 w-28 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
-          defaultValue={row.original.target}
-          id={`${row.original.id}-target`}
-        />
-      </form>
-    ),
+      return (
+        <div className="text-right text-sm text-muted-foreground">
+          {formatDeadline(deadline)}
+        </div>
+      );
+    },
     meta: {
       headerClassName: "w-[150px] text-right",
       cellClassName: "w-[150px] text-right",
@@ -272,31 +278,19 @@ const columns = [
   {
     accessorKey: "limit",
     header: "Priority",
-    cell: ({ row, table }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
+    cell: ({ row }) => {
+      const priority = row.original.limit || "Medium";
 
-          const formData = new FormData(e.currentTarget);
-          const limit = formData.get("limit");
-
-          table.options.meta?.updateTask(row.original.id, {
-            limit: limit || "",
-          });
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
-          Priority
-        </Label>
-
-        <Input
-          name="limit"
-          className="ml-auto h-8 w-24 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
-          defaultValue={row.original.limit}
-          id={`${row.original.id}-limit`}
-        />
-      </form>
-    ),
+      return (
+        <div className="text-right">
+          <span
+            className={`text-sm font-medium ${getPriorityStyles(priority)}`}
+          >
+            {priority}
+          </span>
+        </div>
+      );
+    },
     meta: {
       headerClassName: "w-[130px] text-right",
       cellClassName: "w-[130px] text-right",

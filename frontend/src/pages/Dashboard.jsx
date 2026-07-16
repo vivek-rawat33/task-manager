@@ -153,6 +153,8 @@ export default function Dashboard() {
           id: task._id || task.id,
           header: task.title || "Untitled Task",
           type: task.type || task.category || "General",
+
+          // For table UI
           status:
             task.status === "pending"
               ? "Todo"
@@ -161,7 +163,15 @@ export default function Dashboard() {
                 : task.status === "completed"
                   ? "Done"
                   : task.status || "Todo",
+
+          // For chart logic
+          rawStatus: task.status,
+          createdAt: task.createdAt,
+          updatedAt: task.updatedAt,
+          completedAt: task.completedAt,
+
           target: task.dueDate ? task.dueDate.split("T")[0] : "",
+
           limit:
             task.priority === "high"
               ? "High"
@@ -170,10 +180,10 @@ export default function Dashboard() {
                 : task.priority === "low"
                   ? "Low"
                   : task.priority || "Medium",
+
           reviewer: task.assignedTo?.name || "Unassigned",
           assignedToId: task.assignedTo?._id ? String(task.assignedTo._id) : "",
         }));
-
         setTasks(formattedTasks);
       } catch (error) {
         console.error("Failed to fetch tasks:", error);
@@ -274,7 +284,7 @@ export default function Dashboard() {
                       <SectionCards data={tasks} />
 
                       <div className="px-4 lg:px-6">
-                        <ChartAreaInteractive data={tasks} />
+                        <ChartAreaInteractive tasks={tasks} />
                       </div>
 
                       <DataTable
