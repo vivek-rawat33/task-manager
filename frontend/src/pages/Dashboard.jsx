@@ -94,7 +94,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [currentUserRole, setCurrentUserRole] = useState("");
   const isMembersPage = location.pathname.endsWith("/members");
-  const isTasksPage = location.pathname.endsWith("/tasks");
   const isMyTasksPage = location.pathname.endsWith("/my-tasks");
   const [currentUserId, setCurrentUserId] = useState("");
   const isAnnouncementsPage = location.pathname.endsWith("/announcements");
@@ -152,7 +151,7 @@ export default function Dashboard() {
         const formattedTasks = rawTasks.map((task) => ({
           id: task._id || task.id,
           header: task.title || "Untitled Task",
-          type: task.type || task.category || "General",
+          type: task.category || "General",
 
           // For table UI
           status:

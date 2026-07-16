@@ -86,6 +86,7 @@ import {
   ChevronsRightIcon,
   CircleIcon,
   SearchIcon,
+  CalendarIcon,
 } from "lucide-react";
 
 export const schema = z.object({
@@ -144,14 +145,26 @@ function formatDeadline(value) {
 
 function getPriorityStyles(priority) {
   if (priority === "High") {
-    return "text-rose-600 dark:text-rose-400";
+    return {
+      badge:
+        "border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300",
+      dot: "bg-red-500",
+    };
   }
 
   if (priority === "Medium") {
-    return "text-amber-600 dark:text-amber-400";
+    return {
+      badge:
+        "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-900/50 dark:bg-purple-950/30 dark:text-purple-300",
+      dot: "bg-purple-500",
+    };
   }
 
-  return "text-emerald-600 dark:text-emerald-400";
+  return {
+    badge:
+      "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300",
+    dot: "bg-blue-500",
+  };
 }
 
 const columns = [
@@ -280,14 +293,17 @@ const columns = [
     header: "Priority",
     cell: ({ row }) => {
       const priority = row.original.limit || "Medium";
+      const styles = getPriorityStyles(priority);
 
       return (
-        <div className="text-right">
-          <span
-            className={`text-sm font-medium ${getPriorityStyles(priority)}`}
+        <div className="flex justify-end">
+          <Badge
+            variant="outline"
+            className={`gap-2 rounded-md px-2.5 py-1 text-xs font-medium ${styles.badge}`}
           >
+            <span className={`size-1.5 rounded-full ${styles.dot}`} />
             {priority}
-          </span>
+          </Badge>
         </div>
       );
     },
@@ -471,7 +487,7 @@ function formatTaskForTable(task) {
   return {
     id: task._id || task.id,
     header: task.title || "Untitled Task",
-    type: task.type || task.category || "General",
+    type: task.category || "General",
     status: toFrontendStatus(task.status),
     target: task.dueDate ? task.dueDate.split("T")[0] : "",
     limit: toFrontendPriority(task.priority),
@@ -642,11 +658,13 @@ export function DataTable({
       const taskPayload = {
         title: taskTitle,
         description: "",
+        category: newTask.type,
         status: toBackendStatus(newTask.status),
         priority: toBackendPriority(newTask.limit),
         dueDate: newTask.target || null,
         assignedTo: newTask.assignedToId || null,
       };
+
       const createdTask = await createTeamTask(teamId, taskPayload);
 
       const selectedMember = members.find(
@@ -742,12 +760,12 @@ export function DataTable({
       const payload = {
         title: mergedTask.header,
         description: mergedTask.description || "",
+        category: mergedTask.type,
         status: toBackendStatus(mergedTask.status),
         priority: toBackendPriority(mergedTask.limit),
         dueDate: mergedTask.target || null,
         assignedTo: mergedTask.assignedToId || null,
       };
-
       await updateTeamTask(teamId, taskId, payload);
 
       toast.success("Task updated successfully");
@@ -929,6 +947,7 @@ export function DataTable({
 
                           <SelectContent>
                             <SelectGroup>
+                              <SelectItem value="General">General</SelectItem>
                               <SelectItem value="Frontend">Frontend</SelectItem>
                               <SelectItem value="Backend">Backend</SelectItem>
                               <SelectItem value="UI">UI</SelectItem>
@@ -1129,6 +1148,7 @@ export function DataTable({
 
                           <SelectContent>
                             <SelectGroup>
+                              <SelectItem value="General">General</SelectItem>
                               <SelectItem value="Frontend">Frontend</SelectItem>
                               <SelectItem value="Backend">Backend</SelectItem>
                               <SelectItem value="UI">UI</SelectItem>
@@ -1491,6 +1511,22 @@ function TableCellViewer({
     });
   }, [item]);
 
+  const deadlineInputRef = React.useRef(null);
+
+  function openDeadlinePicker() {
+    const input = deadlineInputRef.current;
+
+    if (!input || !canEditFullTask) return;
+
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+      return;
+    }
+
+    input.focus();
+    input.click();
+  }
+
   function handleSaveChanges(e) {
     e.preventDefault();
 
@@ -1525,7 +1561,11 @@ function TableCellViewer({
       direction={isMobile ? "bottom" : "right"}
     >
       <DrawerTrigger asChild>
-        <Button variant="link" className="w-fit px-0 text-left text-foreground">
+        <Button
+          variant="link"
+          className="block max-w-55 truncate px-0 text-left text-foreground sm:max-w-65 md:max-w-[320px]"
+          title={item.header}
+        >
           {item.header}
         </Button>
       </DrawerTrigger>
@@ -1558,7 +1598,7 @@ function TableCellViewer({
               <div className="flex items-center justify-between gap-4">
                 <span className="text-muted-foreground">Deadline</span>
                 <span className="font-medium">
-                  {formData.target || "No deadline"}
+                  {formatDeadline(formData.target)}
                 </span>
               </div>
 
@@ -1670,17 +1710,35 @@ function TableCellViewer({
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-3">
               <Label htmlFor={`${item.id}-target`}>Deadline</Label>
-              <Input
-                id={`${item.id}-target`}
-                value={formData.target}
-                disabled={!canEditFullTask}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    target: e.target.value,
-                  }))
-                }
-              />
+              <div className="relative">
+                <Input
+                  ref={deadlineInputRef}
+                  id={`${item.id}-target`}
+                  type="date"
+                  min={getTodayDateInputValue()}
+                  value={formData.target || ""}
+                  disabled={!canEditFullTask}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      target: e.target.value,
+                    }))
+                  }
+                  className="pr-10 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                />
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  disabled={!canEditFullTask}
+                  onClick={openDeadlinePicker}
+                  className="absolute inset-y-1 right-1 my-auto size-8 text-muted-foreground transition-colors duration-150 hover:bg-muted/50 hover:text-foreground active:bg-muted/60 active:translate-y-0"
+                >
+                  <CalendarIcon className="size-4" />
+                  <span className="sr-only">Open calendar</span>
+                </Button>
+              </div>
             </div>
 
             <div className="flex flex-col gap-3">
@@ -1705,10 +1763,6 @@ function TableCellViewer({
                     <SelectItem value="High">High</SelectItem>
                     <SelectItem value="Medium">Medium</SelectItem>
                     <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="5">5</SelectItem>
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="15">15</SelectItem>
-                    <SelectItem value="20">20</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>

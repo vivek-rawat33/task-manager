@@ -39,6 +39,19 @@ const taskSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    category: {
+      type: String,
+      enum: [
+        "General",
+        "Frontend",
+        "Backend",
+        "UI",
+        "Feature",
+        "Bug Fix",
+        "Planning",
+      ],
+      default: "General",
+    },
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

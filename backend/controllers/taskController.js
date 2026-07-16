@@ -4,14 +4,23 @@ import { validateTaskInput } from "../utils/validateTask.js";
 import TeamMember from "../models/teamMemberModel.js";
 import teamMemberModel from "../models/teamMemberModel.js";
 
-const cleanTaskPayload = (body) => ({
-  title: body.title?.trim(),
-  description: body.description?.trim() || "",
-  status: body.status || "pending",
-  priority: body.priority || "medium",
-  dueDate: body.dueDate || null,
-  assignedTo: body.assignedTo || null,
-});
+const cleanTaskPayload = (body) => {
+  const payload = {};
+
+  if (body.title !== undefined) payload.title = body.title.trim();
+  if (body.description !== undefined) {
+    payload.description = body.description.trim();
+  }
+
+  if (body.category !== undefined) payload.category = body.category;
+  if (body.status !== undefined) payload.status = body.status;
+  if (body.priority !== undefined) payload.priority = body.priority;
+  if (body.dueDate !== undefined) payload.dueDate = body.dueDate || null;
+  if (body.assignedTo !== undefined)
+    payload.assignedTo = body.assignedTo || null;
+
+  return payload;
+};
 
 const isPastDate = (date) => {
   if (!date) return false;
@@ -134,11 +143,11 @@ export const createTask = async (req, res, next) => {
       ...cleanTaskPayload(req.body),
       teamId,
       createdBy: currentUserId,
-      assignedTo: assignedTo || null,
+      assignedTo: req.body.assignedTo || null,
     });
-
     res.status(201).json(task);
   } catch (error) {
+    console.log("Backend error:", error.response?.data);
     next(error);
   }
 };
