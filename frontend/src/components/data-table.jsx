@@ -319,6 +319,7 @@ const columns = [
   {
     accessorKey: "reviewer",
     header: "Assignee",
+
     cell: ({ row, table }) => {
       const members = table.options.meta?.members || [];
 
@@ -333,6 +334,7 @@ const columns = [
 
             table.options.meta?.updateTask(row.original.id, {
               assignedToId: value === "__unassigned" ? "" : value,
+
               reviewer:
                 value === "__unassigned"
                   ? "Unassigned"
@@ -340,7 +342,7 @@ const columns = [
             });
           }}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full min-w-40 lg:min-w-0">
             <SelectValue placeholder="Assign member" />
           </SelectTrigger>
 
@@ -348,13 +350,18 @@ const columns = [
             <SelectItem value="__unassigned">Unassigned</SelectItem>
 
             {members.map((member) => (
-              <SelectItem key={member.id} value={member.id}>
+              <SelectItem key={member.id} value={String(member.id)}>
                 {member.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       );
+    },
+
+    meta: {
+      headerClassName: "w-[180px] min-w-[180px] lg:w-auto lg:min-w-0",
+      cellClassName: "w-[180px] min-w-[180px] lg:w-auto lg:min-w-0",
     },
   },
   {
@@ -1326,7 +1333,7 @@ export function DataTable({
             className="h-9 pl-8"
           />
         </div>
-        <div className="overflow-x-auto rounded-lg border">
+        <div className="overflow-x-auto rounded-lg border lg:overflow-x-hidden">
           <DndContext
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
@@ -1334,7 +1341,7 @@ export function DataTable({
             sensors={sensors}
             id={sortableId}
           >
-            <Table className="min-w-260 table-fixed">
+            <Table className="min-w-[1100px] table-fixed lg:w-full lg:min-w-0 lg:table-auto">
               <TableHeader className="sticky top-0 z-10 bg-muted">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
