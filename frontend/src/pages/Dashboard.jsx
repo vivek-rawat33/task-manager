@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
+import { PriorityChart } from "@/components/priority-chart";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getTeamTasks } from "@/api/taskApi";
@@ -285,24 +286,23 @@ export default function Dashboard() {
                     <>
                       {/* Charts Section */}
                       <div className="space-y-4 px-4 lg:px-6">
-                        {/* Chart 1: Mobile + Tablet + Desktop */}
+                        {/* Mobile + Tablet + Desktop */}
                         <ChartAreaInteractive tasks={tasks} />
 
-                        {/* Chart 2: Mobile + Tablet + Desktop */}
-                        <div className="grid gap-4">
+                        {/* Status mobile/tablet/desktop, Priority only desktop */}
+                        <div className="grid gap-4 xl:grid-cols-2">
                           <StatusChart tasks={tasks} />
+
+                          <div className="hidden xl:block">
+                            <PriorityChart tasks={tasks} />
+                          </div>
                         </div>
 
                         {/* 
-    Desktop/Laptop only charts.
-    Inko tab uncomment karna jab components bana lo.
+    Future desktop-only charts
 
     <div className="hidden xl:grid xl:grid-cols-2 xl:gap-4">
-      <PriorityChart tasks={tasks} />
       <DeadlineChart tasks={tasks} />
-    </div>
-
-    <div className="hidden xl:grid xl:grid-cols-2 xl:gap-4">
       <MemberPerformanceChart tasks={tasks} />
     </div>
   */}

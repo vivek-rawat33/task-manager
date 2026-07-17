@@ -1341,7 +1341,7 @@ export function DataTable({
             sensors={sensors}
             id={sortableId}
           >
-            <Table className="min-w-[1100px] table-fixed lg:w-full lg:min-w-0 lg:table-auto">
+            <Table className="min-w-275 table-fixed lg:w-full lg:min-w-0 lg:table-auto">
               <TableHeader className="sticky top-0 z-10 bg-muted">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
