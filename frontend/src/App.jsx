@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/Login-page.jsx";
 import SignupPage from "./pages/Signup-page.jsx";
 import Page from "./pages/Dashboard.jsx";
-// import { Analytics } from "@vercel/analytics/next";
+
 function App() {
   return (
     <Routes>
@@ -16,8 +16,6 @@ function App() {
       <Route path="/dashboard/:teamId/*" element={<Page />} />
 
       <Route path="*" element={<Navigate to="/signup" replace />} />
-
-      {/* <Analytics /> */}
     </Routes>
   );
 }
