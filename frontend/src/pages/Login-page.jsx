@@ -1,5 +1,5 @@
 import { LoginForm } from "@/components/login-form";
-import { getMyTeams } from "@/api/teamApi";
+
 export default function LoginPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#020617]">

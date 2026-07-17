@@ -59,6 +59,7 @@ function formatDate(date) {
     year: "numeric",
   });
 }
+
 function normalizeTeam(item) {
   const team = item.team || item.teamId || item;
 
@@ -282,18 +283,29 @@ export default function Dashboard() {
                     />
                   ) : (
                     <>
-                      <SectionCards data={tasks} />
-
-                      <div className="px-4 lg:px-6">
+                      {/* Charts Section */}
+                      <div className="space-y-4 px-4 lg:px-6">
+                        {/* Chart 1: Mobile + Tablet + Desktop */}
                         <ChartAreaInteractive tasks={tasks} />
-                      </div>
 
-                      <div className="grid gap-4 px-4 lg:grid-cols-2 lg:px-6">
-                        <StatusChart tasks={tasks} />
-
-                        <div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
-                          Priority chart will come here.
+                        {/* Chart 2: Mobile + Tablet + Desktop */}
+                        <div className="grid gap-4">
+                          <StatusChart tasks={tasks} />
                         </div>
+
+                        {/* 
+    Desktop/Laptop only charts.
+    Inko tab uncomment karna jab components bana lo.
+
+    <div className="hidden xl:grid xl:grid-cols-2 xl:gap-4">
+      <PriorityChart tasks={tasks} />
+      <DeadlineChart tasks={tasks} />
+    </div>
+
+    <div className="hidden xl:grid xl:grid-cols-2 xl:gap-4">
+      <MemberPerformanceChart tasks={tasks} />
+    </div>
+  */}
                       </div>
                       <DataTable
                         data={
