@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import "./index.css";
 import { TooltipProvider } from "./components/ui/tooltip.jsx";
 import { ThemeProvider } from "./components/theme-provider.jsx";
+import { Analytics } from "@vercel/analytics/react";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -12,6 +13,7 @@ createRoot(document.getElementById("root")).render(
       <ThemeProvider>
         <TooltipProvider>
           <App />
+          <Analytics />
         </TooltipProvider>
       </ThemeProvider>
     </BrowserRouter>
