@@ -11,17 +11,10 @@ function App() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/signin" element={<LoginPage />} />
 
-      {/* <Route path="/dashboard" element={<Page />} />
-       */}
+      <Route path="/dashboard" element={<Page />} />
+      
 
-      <Route
-        path="/dashboard"
-        element={
-          <div className="flex min-h-screen items-center justify-center text-3xl">
-            Dashboard loaded
-          </div>
-        }
-      />
+     
       <Route path="/dashboard/:teamId/*" element={<Page />} />
 
       <Route path="*" element={<Navigate to="/signup" replace />} />
