@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
-import { SectionCards } from "@/components/section-cards";
+// import { SectionCards } from "@/components/section-cards";
 import { DeadlineChart } from "@/components/deadline-chart";
 import { MemberPerformanceChart } from "@/components/member-performance-chart";
 import { PriorityChart } from "@/components/priority-chart";
@@ -90,6 +90,34 @@ function getLoggedInUserId() {
   }
 }
 
+const toFrontendStatus = (status) => {
+  if (status === "completed") return "Done";
+  if (status === "in-progress") return "In Process";
+  return "Todo";
+};
+
+const toFrontendPriority = (priority) => {
+  if (priority === "high") return "High";
+  if (priority === "low") return "Low";
+  return "Medium";
+};
+
+const formatTaskForTable = (task) => ({
+  id: task._id || task.id,
+  header: task.title || "Untitled Task",
+  description: task.description || "",
+  type: task.category || "General",
+  status: toFrontendStatus(task.status),
+  rawStatus: task.status,
+  target: task.dueDate ? task.dueDate.split("T")[0] : "",
+  limit: toFrontendPriority(task.priority),
+  reviewer: task.assignedTo?.name || "Unassigned",
+  assignedToId: task.assignedTo?._id ? String(task.assignedTo._id) : "",
+  createdAt: task.createdAt,
+  updatedAt: task.updatedAt,
+  completedAt: task.completedAt,
+});
+
 export default function Dashboard() {
   const [currentTeam, setCurrentTeam] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -104,13 +132,26 @@ export default function Dashboard() {
   const [currentUserId, setCurrentUserId] = useState("");
   const isAnnouncementsPage = location.pathname.endsWith("/announcements");
   const isSettingsPage = location.pathname.endsWith("/settings");
-  useEffect(() => {
-    async function fetchTasks() {
+  const fetchDashboardData = useCallback(
+    async ({ silent = false } = {}) => {
       try {
         if (!teamId) {
-          setLoading(false);
+          setCurrentTeam(null);
+          setTasks([]);
+          setMembers([]);
+          setCurrentUserRole("");
+
+          if (!silent) {
+            setLoading(false);
+          }
+
           return;
         }
+
+        if (!silent) {
+          setLoading(true);
+        }
+
         const [taskRes, memberRes, teamRes] = await Promise.all([
           getTeamTasks(teamId),
           getTeamMembers(teamId),
@@ -130,6 +171,7 @@ export default function Dashboard() {
         setCurrentTeam(selectedTeam || null);
 
         const rawTasks = taskRes.tasks || [];
+
         const rawMembers =
           memberRes.members || memberRes.teamMembers || memberRes || [];
 
@@ -148,57 +190,31 @@ export default function Dashboard() {
 
         const loggedInUserId = getLoggedInUserId();
         setCurrentUserId(loggedInUserId);
+
         const currentMember = formattedMembers.find(
           (member) => String(member.id) === String(loggedInUserId),
         );
 
         setCurrentUserRole(currentMember?.role || "");
 
-        const formattedTasks = rawTasks.map((task) => ({
-          id: task._id || task.id,
-          header: task.title || "Untitled Task",
-          type: task.category || "General",
+        const formattedTasks = rawTasks.map(formatTaskForTable);
 
-          // For table UI
-          status:
-            task.status === "pending"
-              ? "Todo"
-              : task.status === "in-progress"
-                ? "In Process"
-                : task.status === "completed"
-                  ? "Done"
-                  : task.status || "Todo",
-
-          // For chart logic
-          rawStatus: task.status,
-          createdAt: task.createdAt,
-          updatedAt: task.updatedAt,
-          completedAt: task.completedAt,
-
-          target: task.dueDate ? task.dueDate.split("T")[0] : "",
-
-          limit:
-            task.priority === "high"
-              ? "High"
-              : task.priority === "medium"
-                ? "Medium"
-                : task.priority === "low"
-                  ? "Low"
-                  : task.priority || "Medium",
-
-          reviewer: task.assignedTo?.name || "Unassigned",
-          assignedToId: task.assignedTo?._id ? String(task.assignedTo._id) : "",
-        }));
         setTasks(formattedTasks);
       } catch (error) {
-        console.error("Failed to fetch tasks:", error);
+        console.error("Failed to fetch dashboard data:", error);
+        toast.error("Failed to load dashboard data");
       } finally {
-        setLoading(false);
+        if (!silent) {
+          setLoading(false);
+        }
       }
-    }
+    },
+    [teamId],
+  );
 
-    fetchTasks();
-  }, [teamId]);
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   return (
     <SidebarProvider
@@ -318,6 +334,9 @@ export default function Dashboard() {
                         members={members}
                         currentUserRole={currentUserRole}
                         currentUserId={currentUserId}
+                        onTasksChange={() =>
+                          fetchDashboardData({ silent: true })
+                        }
                       />
                     </>
                   )}

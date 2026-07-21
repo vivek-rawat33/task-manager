@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 import { createTeamTask, deleteTeamTask, updateTeamTask } from "@/api/taskApi";
 import { cn } from "@/lib/utils";
 import {
@@ -512,6 +513,7 @@ export function DataTable({
   members = [],
   currentUserRole,
   currentUserId = "",
+  onTasksChange,
 }) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [data, setData] = React.useState(() => initialData || []);
@@ -532,8 +534,12 @@ export function DataTable({
 
   const isMember = currentUserRole === "member";
   const isViewer = currentUserRole === "viewer";
+
   React.useEffect(() => {
     setData(initialData || []);
+  }, [initialData]);
+  useEffect(() => {
+    setData(initialData);
   }, [initialData]);
 
   const sortableId = React.useId();
@@ -554,6 +560,12 @@ export function DataTable({
       ).length,
     };
   }, [data]);
+
+  const refreshParentTasks = async () => {
+    if (typeof onTasksChange === "function") {
+      await onTasksChange();
+    }
+  };
 
   const filteredData = React.useMemo(() => {
     let tasks = data;
@@ -677,7 +689,7 @@ export function DataTable({
       };
 
       const createdTask = await createTeamTask(teamId, taskPayload);
-
+      await refreshParentTasks();
       const selectedMember = members.find(
         (member) => String(member.id) === String(newTask.assignedToId),
       );
@@ -710,7 +722,7 @@ export function DataTable({
 
     try {
       await deleteTeamTask(teamId, taskId);
-
+      await refreshParentTasks();
       setData((currentData) =>
         currentData.filter((task) => String(task.id) !== String(taskId)),
       );
@@ -778,6 +790,7 @@ export function DataTable({
         assignedTo: mergedTask.assignedToId || null,
       };
       await updateTeamTask(teamId, taskId, payload);
+      await refreshParentTasks();
 
       toast.success("Task updated successfully");
     } catch (error) {
